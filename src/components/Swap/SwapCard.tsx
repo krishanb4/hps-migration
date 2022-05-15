@@ -316,20 +316,22 @@ const SwapCard: React.FC = () => {
     const handleChange = (event: ChangeEvent<{ value: string }>) => {
         setState(event?.currentTarget?.value);
         setNewValue(amount);
-        setSlider((Number(event?.currentTarget?.value) / HpsBalance) * 100)
+        const percentage = ((Number(event?.currentTarget?.value) / HpsBalance) * 100).toFixed(0);
+
+        setSlider(Number(percentage));
     }
     useEffect(() => {
         const newHPS = (Number(amount) / 1000).toString();
         setNewValue(newHPS);
     }, [amount, setNewValue])
 
-    const HpsBalance = 100;
+    const HpsBalance = 150;
 
     const [slider, setSlider] = useState(0);
 
     const onSlide = (e: any) => {
         setSlider(e.target.value);
-        const newValue = ((HpsBalance * e.target.value) / 100).toString();
+        const newValue = ((HpsBalance * e.target.value) / 100).toFixed(0).toString();
         setState(newValue)
     };
     return (
