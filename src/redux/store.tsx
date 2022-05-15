@@ -1,0 +1,14 @@
+import { createStore, combineReducers, applyMiddleware } from 'redux';
+import thunk from 'redux-thunk';
+import { reducer } from './reducer';
+import { composeWithDevTools } from 'redux-devtools-extension';
+
+export const rootReducer = combineReducers({ reducer: reducer })
+
+export type AppState = ReturnType<typeof store.getState>
+
+export const store = createStore(
+    rootReducer,
+    composeWithDevTools(applyMiddleware(thunk))
+);
+
