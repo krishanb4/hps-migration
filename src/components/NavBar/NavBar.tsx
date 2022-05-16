@@ -44,6 +44,24 @@ const NavBar: React.FC = () => {
     const [click, setClick] = useState(false);
     const handleClick = () => setClick(!click);
 
+    function WalletButton() {
+
+        if (!window.ethereum) {
+            return (
+                <MenuLinkBtn onClick={connectToWallet}>Connect</MenuLinkBtn>
+            )
+        } else if (networkID !== Number(process.env.REACT_APP_NETWORK_ID)) {
+            return (
+                <MenuLinkBtn onClick={changeNetworkToBsc}>Wrong Nwtwork</MenuLinkBtn>
+            )
+        }
+        else if (connected) {
+            return (
+                <MenuLinkBtn onClick={diConnectToWallet}>{shortAddress}</MenuLinkBtn>
+            )
+        }
+    }
+
     return (
         <>
             <Nav>
@@ -57,16 +75,17 @@ const NavBar: React.FC = () => {
                     </MenuIcon>
                     <Menu onClick={handleClick} click={click}>
                         <MenuItemBtn>
-                            {networkID === Number(process.env.REACT_APP_NETWORK_ID) ? (
-                                <>
-                                    <MenuLinkBtn onClick={connected ? diConnectToWallet : connectToWallet}>{connected ? shortAddress : 'Connect'}</MenuLinkBtn>
-                                </>
-                            ) : (
-                                <>
-                                    <MenuLinkBtn onClick={changeNetworkToBsc}>Wrong Network</MenuLinkBtn>
-                                </>
-                            )
-                            }
+                            {(!window.ethereum) ? (<MenuLinkBtn onClick={connectToWallet}>Connect</MenuLinkBtn>) : (
+                                (networkID === Number(process.env.REACT_APP_NETWORK_ID)) ? (
+                                    <>
+                                        <MenuLinkBtn onClick={connected ? async () => "resffr" : connectToWallet}>{connected ? shortAddress : 'Unlock Wallet'}</MenuLinkBtn>
+                                    </>
+                                ) : (
+                                    <>
+                                        <MenuLinkBtn onClick={changeNetworkToBsc}>Wrong Network</MenuLinkBtn>
+                                    </>
+                                )
+                            )}
                         </MenuItemBtn>
                     </Menu>
 

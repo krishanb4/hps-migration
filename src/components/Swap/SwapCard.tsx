@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import ArrowImg from '../images/double-down-arrows.svg'
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '../../redux/store';
-import { connectWallet } from '../walletconnect/connection';
-import { mint } from '../../utils/callHelpers';
+import { connectWallet, changeNetwork } from '../walletconnect/connection';
+import { hpsBalance } from '../../utils/callHelpers';
 
 const Main = styled.div`
     font-family: "Poppins", sans-serif;
@@ -301,7 +301,7 @@ const SwapCard: React.FC = () => {
 
     const dispatch = useDispatch();
 
-    const { web3, address, connected } = useSelector(
+    const { web3, address, connected, networkID } = useSelector(
         (state: AppState) =>
             state.reducer
     );
@@ -317,23 +317,49 @@ const SwapCard: React.FC = () => {
         setState(event?.currentTarget?.value);
         setNewValue(amount);
         const percentage = ((Number(event?.currentTarget?.value) / HpsBalance) * 100).toFixed(0);
+        if (Number(percentage) > 100) {
+            setSlider(100);
+        } else if (Number(percentage) < 0) {
+            setSlider(0);
+        } else {
+            setSlider(Number(percentage));
+        }
 
-        setSlider(Number(percentage));
     }
     useEffect(() => {
-        const newHPS = (Number(amount) / 1000).toString();
+        const newHPS = (Number(amount)).toString();
         setNewValue(newHPS);
     }, [amount, setNewValue])
 
-    const HpsBalance = 150;
+    const [HpsBalance, hpsBalanceSet] = useState(0);
 
     const [slider, setSlider] = useState(0);
 
     const onSlide = (e: any) => {
         setSlider(e.target.value);
-        const newValue = ((HpsBalance * e.target.value) / 100).toFixed(0).toString();
+        const newValue = ((HpsBalance * e.target.value) / 100).toFixed(6).toString();
         setState(newValue)
     };
+    const changeNetworkToBsc = () => {
+        changeNetwork();
+    }
+    useEffect(() => {
+
+        async function fetchData() {
+            const addresstopass = address.toString()
+            if (addresstopass) {
+                hpsBalance(addresstopass).then((value) => {
+                    const minted: number = value;
+                    hpsBalanceSet(minted)
+                });
+            }
+        }
+        setInterval(() =>
+
+            fetchData()
+            , 3000);
+    }, [address]);
+
     return (
         <>
             <Main>
@@ -407,15 +433,18 @@ const SwapCard: React.FC = () => {
                                 </SliderValue>
                             </SliderInput>
                             <div>
-                                {connected ? (
-                                    <>
-                                        <SwapButton onClick={async () => mint(web3)}>Swap</SwapButton>
-                                    </>
-                                ) : (
-                                    <>
-                                        <SwapButton onClick={connectToWallet}>Unlock Wallet</SwapButton>
-                                    </>
+                                {(!window.ethereum) ? (<SwapButton onClick={connectToWallet}>Connect</SwapButton>) : (
+                                    (networkID === Number(process.env.REACT_APP_NETWORK_ID)) ? (
+                                        <>
+                                            <SwapButton onClick={connected ? async () => "resffr" : connectToWallet}>{connected ? 'Swap' : 'Unlock Wallet'}</SwapButton>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <SwapButton onClick={changeNetworkToBsc}>Wrong Network</SwapButton>
+                                        </>
+                                    )
                                 )}
+
 
                             </div>
                         </Gridsection>
