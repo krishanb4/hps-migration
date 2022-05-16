@@ -360,6 +360,25 @@ const SwapCard: React.FC = () => {
             , 3000);
     }, [address]);
 
+    const alerttest = () => {
+        alert('skjneskfjfnkrnr');
+    }
+
+    function walletconnectOnclick() {
+        if (connected) {
+            alerttest();
+        } else {
+            connectToWallet()
+        }
+    }
+    function swapButtontext() {
+        if (connected) {
+            return 'Swap';
+        } else {
+            return 'Unlock Wallet';
+        }
+    }
+
     return (
         <>
             <Main>
@@ -433,9 +452,9 @@ const SwapCard: React.FC = () => {
                                 </SliderValue>
                             </SliderInput>
                             <div>
-                                {networkID === Number(process.env.REACT_APP_NETWORK_ID) ? (
+                                {(networkID === Number(process.env.REACT_APP_NETWORK_ID) || networkID === 0) ? (
                                     <>
-                                        <SwapButton onClick={connected ? async () => "resffr" : connectToWallet}>{connected ? 'Swap' : 'Unlock Wallet'}</SwapButton>
+                                        <SwapButton onClick={walletconnectOnclick}>{swapButtontext()}</SwapButton>
                                     </>
                                 ) : (
                                     <>

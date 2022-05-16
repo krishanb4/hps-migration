@@ -11,15 +11,15 @@ import HpsImage from "../images/hps.png"
 
 const NavBar: React.FC = () => {
 
-    
+
     const dispatch = useDispatch();
     const { address, connected, networkID } = useSelector(
         (state: AppState) =>
             state.reducer
     );
-    
+
     const [shortAddress, setShortAddress] = useState('');
- 
+
     useEffect(() => {
         if (!connected) {
             return;
@@ -48,6 +48,20 @@ const NavBar: React.FC = () => {
     const [click, setClick] = useState(false);
     const handleClick = () => setClick(!click);
 
+    function walletconnectOnclick() {
+        if (connected) {
+            diConnectToWallet();
+        } else {
+            connectToWallet()
+        }
+    }
+    function swapButtontext() {
+        if (connected) {
+            return shortAddress;
+        } else {
+            return 'Unlock Wallet';
+        }
+    }
 
     return (
         <>
@@ -62,11 +76,9 @@ const NavBar: React.FC = () => {
                     </MenuIcon>
                     <Menu onClick={handleClick} click={click}>
                         <MenuItemBtn>
-
-                        
-                            {(networkID === Number(process.env.REACT_APP_NETWORK_ID) || networkID===0) ? (
+                            {(networkID === Number(process.env.REACT_APP_NETWORK_ID) || networkID === 0) ? (
                                 <>
-                                    <MenuLinkBtn onClick={connected ? async () => "resffr" : connectToWallet}>{connected ? shortAddress : 'Unlock Wallet'}</MenuLinkBtn>
+                                    <MenuLinkBtn onClick={walletconnectOnclick}>{swapButtontext()}</MenuLinkBtn>
                                 </>
                             ) : (
                                 <>
