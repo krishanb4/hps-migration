@@ -11,18 +11,22 @@ import HpsImage from "../images/hps.png"
 
 const NavBar: React.FC = () => {
 
+    
     const dispatch = useDispatch();
     const { address, connected, networkID } = useSelector(
         (state: AppState) =>
             state.reducer
     );
+    
     const [shortAddress, setShortAddress] = useState('');
+ 
     useEffect(() => {
         if (!connected) {
             return;
         }
         setShortAddress(`${address.slice(0, 6)}...${address.slice(-4)}`);
     }, [connected, address]);
+
     useEffect(() => {
         if (networkID !== Number(process.env.REACT_APP_NETWORK_ID)) {
             changeNetwork();
@@ -44,23 +48,6 @@ const NavBar: React.FC = () => {
     const [click, setClick] = useState(false);
     const handleClick = () => setClick(!click);
 
-    function WalletButton() {
-
-        if (!window.ethereum) {
-            return (
-                <MenuLinkBtn onClick={connectToWallet}>Connect</MenuLinkBtn>
-            )
-        } else if (networkID !== Number(process.env.REACT_APP_NETWORK_ID)) {
-            return (
-                <MenuLinkBtn onClick={changeNetworkToBsc}>Wrong Nwtwork</MenuLinkBtn>
-            )
-        }
-        else if (connected) {
-            return (
-                <MenuLinkBtn onClick={diConnectToWallet}>{shortAddress}</MenuLinkBtn>
-            )
-        }
-    }
 
     return (
         <>
@@ -75,7 +62,9 @@ const NavBar: React.FC = () => {
                     </MenuIcon>
                     <Menu onClick={handleClick} click={click}>
                         <MenuItemBtn>
-                            {networkID === Number(process.env.REACT_APP_NETWORK_ID) ? (
+
+                        
+                            {(networkID === Number(process.env.REACT_APP_NETWORK_ID) || networkID===0) ? (
                                 <>
                                     <MenuLinkBtn onClick={connected ? async () => "resffr" : connectToWallet}>{connected ? shortAddress : 'Unlock Wallet'}</MenuLinkBtn>
                                 </>
