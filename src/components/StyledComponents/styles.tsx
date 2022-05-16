@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 import { Container } from './Globalstyles';
 import { Link } from 'react-router-dom';
-import { GiBarbute } from 'react-icons/gi';
 
 
 export const Nav = styled.nav`
@@ -198,5 +197,8 @@ cursor: pointer;
 &:hover {
     color: #000;
     background-color: #fff;
+}
+@media only screen and (max-width:700px){
+    background-color: #f98024;
 }
 `;

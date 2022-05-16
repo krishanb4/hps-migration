@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Nav, NavbarContainer, NavLogo, NavIcon, MenuIcon, Menu, MenuItem, MenuLink, MenuItemBtn, MenuLinkBtn } from '../StyledComponents/styles'
+import { Nav, NavbarContainer, NavLogo, NavIcon, MenuIcon, Menu, MenuItemBtn, MenuLinkBtn } from '../StyledComponents/styles'
 import { connectWallet, disconnectWallet, changeNetwork } from '../walletconnect/connection';
 import { AppState } from '../../redux/store';
 import { BiMenu, BiX } from "react-icons/bi";

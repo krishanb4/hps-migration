@@ -301,7 +301,7 @@ const SwapCard: React.FC = () => {
 
     const dispatch = useDispatch();
 
-    const { web3, address, connected, networkID } = useSelector(
+    const { address, connected, networkID } = useSelector(
         (state: AppState) =>
             state.reducer
     );
@@ -400,7 +400,7 @@ const SwapCard: React.FC = () => {
                                                 </TokenButtonSpanDiv>
                                             </TokenButtonSpan>
                                         </TokenButton>
-                                        <ValueInput type="text" value={amount} defaultValue="" onChange={handleChange} pattern="^[0-9]*[.,]?[0-9]*$" placeholder="0.0" />
+                                        <ValueInput type="text" value={amount} onChange={handleChange} pattern="^[0-9]*[.,]?[0-9]*$" placeholder="0.0" />
 
                                     </ValueSection>
                                     <CurrencyInputbalance>

@@ -1,16 +1,15 @@
 import contractAbi from '../config/abi/contractabi.json';
 import Web3 from "web3";
-import { ethers } from "ethers";
+import { ethers , providers } from "ethers";
 import Web3Modal from "web3modal";
 import { notifysuccess,notifyerror  } from '../utils/toastHelper';
 import { Dispatch } from 'redux';
 import * as types from '../constants/actionConstants';
 import { WalletActions } from '../redux/reducer'
-import { providers } from "ethers";
 import WalletConnectProvider from '@walletconnect/web3-provider';
 
 const RPC_URL_BSC = 'https://bsc-dataseed.binance.org/'
-const RPC_URL_ROPSTON = 'https://ropsten.infura.io/v3/09bcc0646ff04b2f844b23be91e375f7'
+// const RPC_URL_ROPSTON = 'https://ropsten.infura.io/v3/09bcc0646ff04b2f844b23be91e375f7'
 
 
 const contractAddress = "0x4Fd32530c0b627a42FCc4f1fA90ec3F270661BC9";
@@ -24,7 +23,9 @@ export const mint = async (web3:any) => {
     let contract = new ethers.Contract(contractAddress , contractAbi,signer);
     
   await contract.mint().then(function (res:any, err:any) {
-    notifysuccess(`Transaction success!`)
+    notifysuccess(`Transaction success!`);
+    console.log(res);
+    
   });
     
 }
@@ -33,18 +34,13 @@ export const totalSupply = async () => {
 
   let contract = new ethers.Contract(contractAddress , contractAbi,provider_main);
   let balance = await contract.totalSupply();
-  
-  console.log('updating nft buy amount every 1s')
   return Number(balance);
 }
 
 export const hpsBalance = async (account:string) => {
-console.log(account);
-
   let hpscontract = new ethers.Contract(hpsContract , contractAbi,provider_main);
   let balance = await hpscontract.balanceOf(account);
-  const sortedbalance =  ethers.utils.formatUnits(balance, 18)
-  console.log('updating hps balance every 3s')
+  const sortedbalance = ethers.utils.formatUnits(balance, 18);
   return Number(sortedbalance);
 }
 
