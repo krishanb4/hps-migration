@@ -433,18 +433,15 @@ const SwapCard: React.FC = () => {
                                 </SliderValue>
                             </SliderInput>
                             <div>
-                                {(!window.ethereum) ? (<SwapButton onClick={connectToWallet}>Connect</SwapButton>) : (
-                                    (networkID === Number(process.env.REACT_APP_NETWORK_ID)) ? (
-                                        <>
-                                            <SwapButton onClick={connected ? async () => "resffr" : connectToWallet}>{connected ? 'Swap' : 'Unlock Wallet'}</SwapButton>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <SwapButton onClick={changeNetworkToBsc}>Wrong Network</SwapButton>
-                                        </>
-                                    )
+                                {networkID === Number(process.env.REACT_APP_NETWORK_ID) ? (
+                                    <>
+                                        <SwapButton onClick={connected ? async () => "resffr" : connectToWallet}>{connected ? 'Swap' : 'Unlock Wallet'}</SwapButton>
+                                    </>
+                                ) : (
+                                    <>
+                                        <SwapButton onClick={changeNetworkToBsc}>Wrong Network</SwapButton>
+                                    </>
                                 )}
-
 
                             </div>
                         </Gridsection>

@@ -75,16 +75,14 @@ const NavBar: React.FC = () => {
                     </MenuIcon>
                     <Menu onClick={handleClick} click={click}>
                         <MenuItemBtn>
-                            {(!window.ethereum) ? (<MenuLinkBtn onClick={connectToWallet}>Connect</MenuLinkBtn>) : (
-                                (networkID === Number(process.env.REACT_APP_NETWORK_ID)) ? (
-                                    <>
-                                        <MenuLinkBtn onClick={connected ? async () => "resffr" : connectToWallet}>{connected ? shortAddress : 'Unlock Wallet'}</MenuLinkBtn>
-                                    </>
-                                ) : (
-                                    <>
-                                        <MenuLinkBtn onClick={changeNetworkToBsc}>Wrong Network</MenuLinkBtn>
-                                    </>
-                                )
+                            {networkID === Number(process.env.REACT_APP_NETWORK_ID) ? (
+                                <>
+                                    <MenuLinkBtn onClick={connected ? async () => "resffr" : connectToWallet}>{connected ? shortAddress : 'Unlock Wallet'}</MenuLinkBtn>
+                                </>
+                            ) : (
+                                <>
+                                    <MenuLinkBtn onClick={changeNetworkToBsc}>Wrong Network</MenuLinkBtn>
+                                </>
                             )}
                         </MenuItemBtn>
                     </Menu>
