@@ -96,10 +96,9 @@ export const Swap = async (web3: any, ammount: number) => {
         return;
     } else {
         const signer = web3.getSigner();
-        console.log(ammount);
-        
+        let amount = (ammount*10**18).toString();
         let swapcontract = new ethers.Contract(HpsSwapContract, swapcontractAbi, signer);
-        await swapcontract.swap(new BigNumber(ammount)).then(function (res: any, err: any) {
+        await swapcontract.swap(amount).then(function (res: any, err: any) {
             console.log(res);
         });
     }
