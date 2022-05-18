@@ -1,19 +1,23 @@
 import contractAbi from '../config/abi/contractabi.json';
+import swapcontractAbi from '../config/abi/hpsswapabi.json';
+import hpscontractAbi from '../config/abi/hpsabi.json';
 import Web3 from "web3";
 import { ethers , providers } from "ethers";
 import Web3Modal from "web3modal";
 import { notifysuccess,notifyerror  } from '../utils/toastHelper';
 import { Dispatch } from 'redux';
 import * as types from '../constants/actionConstants';
-import { WalletActions } from '../redux/reducer'
+import { WalletActions,ApprovalActions } from '../redux/reducer'
 import WalletConnectProvider from '@walletconnect/web3-provider';
+import BigNumber from 'bignumber.js'
 
 const RPC_URL_BSC = 'https://bsc-dataseed.binance.org/'
 // const RPC_URL_ROPSTON = 'https://ropsten.infura.io/v3/09bcc0646ff04b2f844b23be91e375f7'
 
 
 const contractAddress = "0x4Fd32530c0b627a42FCc4f1fA90ec3F270661BC9";
-const hpsContract = "0xeDa21B525Ac789EaB1a08ef2404dd8505FfB973D";
+const hpsContract = "0xeDa21B525Ac789EaB1a08ef2404dd8505FfB973D"; 
+const HpsSwapContract = "0x31608A6e0Ba786401e4E86e4Ae74811CAAFc346f";
 const provider_main = new ethers.providers.JsonRpcProvider(RPC_URL_BSC);
 
 export const mint = async (web3:any) => {
@@ -30,6 +34,77 @@ export const mint = async (web3:any) => {
     
 }
 
+
+
+export const approval = (web3:any) => async (dispatch: Dispatch<ApprovalActions>) =>  {
+    const signer = web3.getSigner();
+    let hpscontract = new ethers.Contract(hpsContract, hpscontractAbi, signer);
+    await hpscontract.approve(HpsSwapContract, ethers.utils.parseEther("80000000")).then(function (res: any, err: any) {
+        dispatch({
+            type: types.FETCH_APPROVAL_DATA_APPROVING,
+            payload: {
+                isApproved: false,
+                approveAmount: 0,
+                isApproving: true
+            }
+        });
+        console.log(res);
+    });
+}
+
+
+export const approvalAmount =(account: string) => async (dispatch: Dispatch<ApprovalActions>) => {
+    if (account) {
+        let contract = new ethers.Contract(hpsContract, hpscontractAbi, provider_main);
+        let balance = await contract.allowance(account, HpsSwapContract);
+        const finalApprovalamount = ethers.utils.formatEther(balance);
+        console.log(finalApprovalamount);
+        if (Number(finalApprovalamount) > 0) {
+            console.log('approve amount > 0');
+        dispatch({
+            type: types.FETCH_APPROVAL_DATA_APPROVED,
+            payload: {
+                isApproved: true,
+                approveAmount: Number(finalApprovalamount),
+                isApproving: false
+            }
+        });
+        } else {
+            console.log('approve amount < 0');
+        dispatch({
+                type: types.FETCH_APPROVAL_DATA,
+                payload: {
+                    isApproved: false,
+                    approveAmount: 0,
+                    isApproving: false
+                }
+    });
+        }
+        return Number(finalApprovalamount);
+    }
+    return 0;
+   
+}
+
+export const updateApproved = ( amount: number) => (dispatch: Dispatch<ApprovalActions>) => {
+    console.log('nothing to update');
+    
+}
+
+export const Swap = async (web3: any, ammount: number) => {
+    if (Number(ammount) <= 0 ) {
+        return;
+    } else {
+        const signer = web3.getSigner();
+        console.log(ammount);
+        
+        let swapcontract = new ethers.Contract(HpsSwapContract, swapcontractAbi, signer);
+        await swapcontract.swap(new BigNumber(ammount)).then(function (res: any, err: any) {
+            console.log(res);
+        });
+    }
+}
+
 export const totalSupply = async () => {
 
   let contract = new ethers.Contract(contractAddress , contractAbi,provider_main);
@@ -37,7 +112,15 @@ export const totalSupply = async () => {
   return Number(balance);
 }
 
+
 export const hpsBalance = async (account:string) => {
+  let hpscontract = new ethers.Contract(hpsContract , contractAbi,provider_main);
+  let balance = await hpscontract.balanceOf(account);
+  const sortedbalance = ethers.utils.formatUnits(balance, 18);
+  return Number(sortedbalance);
+}
+
+const gethpsBalance = async (account:string) => {
   let hpscontract = new ethers.Contract(hpsContract , contractAbi,provider_main);
   let balance = await hpscontract.balanceOf(account);
   const sortedbalance = ethers.utils.formatUnits(balance, 18);
@@ -55,7 +138,10 @@ export const disconnectWallet = () => async (dispatch: Dispatch<WalletActions>) 
                 loading: false,
                 connected: false,
                 address: "",
-                networkID: Number(process.env.REACT_APP_NETWORK_ID)
+                networkID: Number(process.env.REACT_APP_NETWORK_ID),
+                hpsBalance: 0,
+                isApproved: false
+
 
             }
         })
@@ -98,21 +184,27 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions>) => 
         const address = accounts[0];
         let networkId = await web3.eth.getChainId();
 
+        
 
         if (networkId === 86) {
             networkId = Number(process.env.REACT_APP_NETWORK_ID);
         }
-        dispatch({
-            type: types.HOME_CONNECT_WALLET_SUCCESS,
-            payload: {
-                web3: web3Provider,
-                loading: false,
-                connected: true,
-                address: address,
-                networkID: networkId
+        const addresstopass = address.toString();
+        const gethpsBalancefrom = await gethpsBalance(addresstopass);
+            dispatch({
+                type: types.HOME_CONNECT_WALLET_SUCCESS,
+                payload: {
+                    web3: web3Provider,
+                    loading: false,
+                    connected: true,
+                    address: address,
+                    networkID: networkId,
+                    hpsBalance: gethpsBalancefrom,
+                    isApproved: false,
 
-            }
-        })
+                }
+            });
+        
 
         const subscribeProvider = (web3Provider: any) => {
             if (!provider.on) {
@@ -128,7 +220,9 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions>) => 
                             loading: false,
                             connected: true,
                             address: accounts[0],
-                            networkID: networkId
+                            networkID: networkId,
+                            hpsBalance: gethpsBalancefrom,
+                            isApproved: false,
 
                         }
                     })
@@ -140,7 +234,9 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions>) => 
                             loading: false,
                             connected: false,
                             address: "",
-                            networkID: networkId
+                            networkID: networkId,
+                            hpsBalance: gethpsBalancefrom,
+                            isApproved: false,
 
                         }
                     })
@@ -159,7 +255,9 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions>) => 
                         loading: false,
                         connected: true,
                         address: address,
-                        networkID: networkId
+                        networkID: networkId,
+                        hpsBalance: gethpsBalancefrom,
+                        isApproved: false,
 
                     }
                 })
@@ -174,7 +272,9 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions>) => 
                         loading: false,
                         connected: false,
                         address: "",
-                        networkID: networkId
+                        networkID: networkId,
+                        hpsBalance: 0,
+                        isApproved: false,
 
                     }
                 })

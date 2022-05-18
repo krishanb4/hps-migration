@@ -1,15 +1,59 @@
+import contractAbi from '../../config/abi/contractabi.json';
 import Web3 from "web3";
+import { ethers, providers } from "ethers";
 import Web3Modal from "web3modal";
-import 'react-toastify/dist/ReactToastify.css';
+import { notifysuccess, notifyerror } from '../../utils/toastHelper';
 import { Dispatch } from 'redux';
 import * as types from '../../constants/actionConstants';
+import { WalletActions, ApprovalActions } from '../../redux/reducer'
 import WalletConnectProvider from '@walletconnect/web3-provider';
-import { WalletActions } from '../../redux/reducer'
-import { providers } from "ethers";
-import { notifyerror } from "../../utils/toastHelper"
+
+const RPC_URL_BSC = 'https://bsc-dataseed.binance.org/'
+// const RPC_URL_ROPSTON = 'https://ropsten.infura.io/v3/09bcc0646ff04b2f844b23be91e375f7'
 
 export default function create() {
     return true;
+}
+
+
+const contractAddress = "0x4Fd32530c0b627a42FCc4f1fA90ec3F270661BC9";
+const hpsContract = "0xeDa21B525Ac789EaB1a08ef2404dd8505FfB973D";
+const provider_main = new ethers.providers.JsonRpcProvider(RPC_URL_BSC);
+
+export const mint = async (web3: any) => {
+
+
+    const signer = web3.getSigner();
+    let contract = new ethers.Contract(contractAddress, contractAbi, signer);
+
+    await contract.mint().then(function (res: any, err: any) {
+        notifysuccess(`Transaction success!`);
+        console.log(res);
+
+    });
+
+}
+
+export const totalSupply = async () => {
+
+    let contract = new ethers.Contract(contractAddress, contractAbi, provider_main);
+    let balance = await contract.totalSupply();
+    return Number(balance);
+}
+
+
+export const hpsBalance = async (account: string) => {
+    let hpscontract = new ethers.Contract(hpsContract, contractAbi, provider_main);
+    let balance = await hpscontract.balanceOf(account);
+    const sortedbalance = ethers.utils.formatUnits(balance, 18);
+    return Number(sortedbalance);
+}
+
+const gethpsBalance = async (account: string) => {
+    let hpscontract = new ethers.Contract(hpsContract, contractAbi, provider_main);
+    let balance = await hpscontract.balanceOf(account);
+    const sortedbalance = ethers.utils.formatUnits(balance, 18);
+    return Number(sortedbalance);
 }
 
 export const disconnectWallet = () => async (dispatch: Dispatch<WalletActions>) => {
@@ -23,17 +67,20 @@ export const disconnectWallet = () => async (dispatch: Dispatch<WalletActions>) 
                 loading: false,
                 connected: false,
                 address: "",
-                networkID: Number(process.env.REACT_APP_NETWORK_ID)
+                networkID: Number(process.env.REACT_APP_NETWORK_ID),
+                hpsBalance: 0,
+                isApproved: false,
+
 
             }
         })
     } catch (err) {
-        notifyerror("user rejected");
+        notifyerror("dosconnected");
     }
 
 }
 
-export const connectWallet = () => async (dispatch: Dispatch<WalletActions>) => {
+export const connectWallet = () => async (dispatch: Dispatch<WalletActions | ApprovalActions>) => {
 
     try {
         const providerOptions = {
@@ -67,9 +114,12 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions>) => 
         let networkId = await web3.eth.getChainId();
 
 
+
         if (networkId === 86) {
             networkId = Number(process.env.REACT_APP_NETWORK_ID);
         }
+        const addresstopass = address.toString();
+        const gethpsBalancefrom = await gethpsBalance(addresstopass);
         dispatch({
             type: types.HOME_CONNECT_WALLET_SUCCESS,
             payload: {
@@ -77,38 +127,58 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions>) => 
                 loading: false,
                 connected: true,
                 address: address,
-                networkID: networkId
+                networkID: networkId,
+                hpsBalance: gethpsBalancefrom,
+                isApproved: false,
 
             }
-        })
+        });
+
 
         const subscribeProvider = (web3Provider: any) => {
             if (!provider.on) {
                 return;
             }
             provider.on("accountsChanged", async (accounts: string) => {
+                window.location.reload();
                 console.log('account changed ' + accounts[0]);
+                const getnewhpsBalancefrom = await gethpsBalance(accounts[0].toString());
+
                 if (accounts[0]) {
+
                     dispatch({
-                        type: types.HOME_CONNECT_WALLET_SUCCESS,
+                        type: types.HOME_CONNECT_WALLET_RESET,
                         payload: {
                             web3: web3Provider,
                             loading: false,
                             connected: true,
                             address: accounts[0],
-                            networkID: networkId
+                            networkID: networkId,
+                            hpsBalance: 0,
+                            isApproved: false,
 
                         }
-                    })
-                } else {
+                    });
                     dispatch({
-                        type: types.HOME_CONNECT_WALLET_SUCCESS,
+                        type: types.APPROVAL_DATA_RESET,
+                        payload: {
+                            isApproved: false,
+                            approveAmount: 0,
+                            isApproving: false
+                        }
+                    });
+                } else {
+
+                    dispatch({
+                        type: types.HOME_ACCOUNTS_CHANGED,
                         payload: {
                             web3: web3Provider,
                             loading: false,
                             connected: false,
                             address: "",
-                            networkID: networkId
+                            networkID: networkId,
+                            hpsBalance: getnewhpsBalancefrom,
+                            isApproved: false,
 
                         }
                     })
@@ -117,24 +187,45 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions>) => 
 
             // Subscribe to chainId change
             provider.on("chainChanged", async (networkId: any) => {
+
                 if (networkId === "0x38") {
                     networkId = 56;
                 }
-                dispatch({
-                    type: types.HOME_NETWORK_CHANGED,
-                    payload: {
-                        web3: web3Provider,
-                        loading: false,
-                        connected: true,
-                        address: address,
-                        networkID: networkId
+                if (networkId === 56) {
+                    dispatch({
+                        type: types.HOME_NETWORK_CHANGED,
+                        payload: {
+                            web3: web3Provider,
+                            loading: false,
+                            connected: true,
+                            address: address,
+                            networkID: networkId,
+                            hpsBalance: gethpsBalancefrom,
+                            isApproved: false,
 
-                    }
-                })
+                        }
+                    })
+                } else {
+                    dispatch({
+                        type: types.HOME_NETWORK_CHANGED,
+                        payload: {
+                            web3: web3Provider,
+                            loading: false,
+                            connected: false,
+                            address: address,
+                            networkID: networkId,
+                            hpsBalance: 0,
+                            isApproved: false,
+
+                        }
+                    })
+                }
+                window.location.reload();
             });
 
             // Subscribe to session disconnection
             provider.on("disconnect", async () => {
+                window.location.reload();
                 dispatch({
                     type: types.HOME_CONNECT_WALLET_SUCCESS,
                     payload: {
@@ -142,7 +233,9 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions>) => 
                         loading: false,
                         connected: false,
                         address: "",
-                        networkID: networkId
+                        networkID: networkId,
+                        hpsBalance: 0,
+                        isApproved: false,
 
                     }
                 })
@@ -171,4 +264,3 @@ export const changeNetwork = () => {
         }
     }
 }
-

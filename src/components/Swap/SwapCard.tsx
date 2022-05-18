@@ -4,7 +4,7 @@ import ArrowImg from '../images/double-down-arrows.svg'
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '../../redux/store';
 import { connectWallet, changeNetwork } from '../walletconnect/connection';
-import { hpsBalance } from '../../utils/callHelpers';
+import { Swap, approval, approvalAmount, updateApproved } from '../../utils/callHelpers'
 
 const Main = styled.div`
     font-family: "Poppins", sans-serif;
@@ -301,21 +301,21 @@ const SwapCard: React.FC = () => {
 
     const dispatch = useDispatch();
 
-    const { address, connected, networkID } = useSelector(
-        (state: AppState) =>
-            state.reducer
-    );
+    const { address, web3, connected, networkID, hpsBalance } = useSelector((state: AppState) => state.reducer);
+    const { isApproved, isApproving } = useSelector((state: AppState) => state.approvereducer);
+
+
 
     const connectToWallet = () => {
         dispatch(connectWallet());
     };
 
     const [amount, setState] = useState("");
-    const [amountsame, setNewValue] = useState("");
+    const [amountsame, setNewValue] = useState(0);
 
     const handleChange = (event: ChangeEvent<{ value: string }>) => {
         setState(event?.currentTarget?.value);
-        setNewValue(amount);
+        setNewValue(Number(amount));
         const percentage = ((Number(event?.currentTarget?.value) / HpsBalance) * 100).toFixed(0);
         if (Number(percentage) > 100) {
             setSlider(100);
@@ -328,10 +328,11 @@ const SwapCard: React.FC = () => {
     }
     useEffect(() => {
         const newHPS = (Number(amount)).toString();
-        setNewValue(newHPS);
+        setNewValue(Number(newHPS));
     }, [amount, setNewValue])
 
     const [HpsBalance, hpsBalanceSet] = useState(0);
+    const [approvedBalance, setApprovedBalance] = useState(0);
 
     const [slider, setSlider] = useState(0);
 
@@ -344,38 +345,61 @@ const SwapCard: React.FC = () => {
         changeNetwork();
     }
     useEffect(() => {
+        hpsBalanceSet(hpsBalance);
 
-        async function fetchData() {
-            const addresstopass = address.toString()
-            if (addresstopass) {
-                hpsBalance(addresstopass).then((value) => {
-                    const minted: number = value;
-                    hpsBalanceSet(minted)
-                });
-            }
+
+        console.log(approvedBalance);
+
+        if (address) {
+
+            dispatch(approvalAmount(address));
+            setInterval(() => {
+                dispatch(approvalAmount(address));
+            }, 5000);
         }
-        setInterval(() =>
-
-            fetchData()
-            , 3000);
-    }, [address]);
-
-    const alerttest = () => {
-        alert('skjneskfjfnkrnr');
-    }
+    }, [approvedBalance, dispatch, address, hpsBalance]);
 
     function walletconnectOnclick() {
         if (connected) {
-            alerttest();
+            if (isApproved) {
+                Swap(web3, amountsame);
+            } else {
+                console.log('approval');
+                if (isApproving) {
+                    return;
+                }
+                dispatch(approval(web3));
+            }
         } else {
             connectToWallet()
         }
     }
     function swapButtontext() {
         if (connected) {
+            if (isApproving) {
+                return 'Approving';
+            }
             return 'Swap';
         } else {
             return 'Unlock Wallet';
+        }
+    }
+    function checkHpsBalabce() {
+        if (hpsBalance <= 0 && connected) {
+            return <SwapButton disabled>Low HPS Balance</SwapButton>;
+        } else {
+            if (!connected) {
+                return <SwapButton onClick={walletconnectOnclick} >{swapButtontext()}</SwapButton>
+            } else {
+                if (isApproved) {
+                    return <SwapButton onClick={walletconnectOnclick}>{swapButtontext()}</SwapButton>
+                } else {
+                    if (isApproving) {
+                        return <SwapButton>Approving</SwapButton>
+                    }
+                    return <SwapButton onClick={walletconnectOnclick}>Approve</SwapButton>
+                }
+            }
         }
     }
 
@@ -386,7 +410,6 @@ const SwapCard: React.FC = () => {
                     <Section>
                         <Gridsection>
                             <div>
-
                                 <Card>
                                     <ValueSection>
                                         <TokenButton>
@@ -427,7 +450,7 @@ const SwapCard: React.FC = () => {
                                                 </TokenButtonSpanDiv>
                                             </TokenButtonSpan>
                                         </TokenButton>
-                                        <ValueInput type="text" readOnly value={amountsame} pattern="^[0-9]*[.,]?[0-9]*$" placeholder="0.0" />
+                                        <ValueInput type="number" readOnly value={amountsame} pattern="^[0-9]*[.,]?[0-9]*$" placeholder="0.0" />
                                     </ValueSection>
                                     <CurrencyInputbalance>
                                         <CurrencyBalance>
@@ -452,9 +475,10 @@ const SwapCard: React.FC = () => {
                                 </SliderValue>
                             </SliderInput>
                             <div>
+
                                 {(networkID === Number(process.env.REACT_APP_NETWORK_ID) || networkID === 0) ? (
                                     <>
-                                        <SwapButton onClick={walletconnectOnclick}>{swapButtontext()}</SwapButton>
+                                        {checkHpsBalabce()}
                                     </>
                                 ) : (
                                     <>

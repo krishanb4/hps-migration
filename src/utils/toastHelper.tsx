@@ -1,5 +1,5 @@
 import { toast } from 'react-toastify';
-
+import 'react-toastify/dist/ReactToastify.css';
 
 export function notifyerror(message: string) {
     return toast.error(message);
