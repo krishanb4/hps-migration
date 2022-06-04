@@ -112,7 +112,7 @@ export const totalSupply = async () => {
 }
 
 
-export const hpsBalance = async (account:string) => {
+export const hpsBalanceget = async (account:string) => {
   let hpscontract = new ethers.Contract(hpsContract , contractAbi,provider_main);
   let balance = await hpscontract.balanceOf(account);
   const sortedbalance = ethers.utils.formatUnits(balance, 18);

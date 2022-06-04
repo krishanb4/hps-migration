@@ -4,7 +4,8 @@ import ArrowImg from '../images/double-down-arrows.svg'
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '../../redux/store';
 import { connectWallet, changeNetwork } from '../walletconnect/connection';
-import { Swap, approval, approvalAmount, updateApproved } from '../../utils/callHelpers'
+import { Swap, approval, approvalAmount, updateApproved, hpsBalanceget } from '../../utils/callHelpers'
+import * as types from '../../constants/actionConstants';
 
 const Main = styled.div`
     font-family: "Poppins", sans-serif;
@@ -348,16 +349,34 @@ const SwapCard: React.FC = () => {
         hpsBalanceSet(hpsBalance);
 
 
+        async function fetchHPS() {
+            const gethpsBalancefrom = await hpsBalanceget(address);
+            dispatch({
+                type: types.HOME_CONNECT_WALLET_SUCCESS,
+                payload: {
+                    web3: web3,
+                    loading: false,
+                    connected: true,
+                    address: address,
+                    networkID: networkID,
+                    hpsBalance: gethpsBalancefrom,
+                    isApproved: false,
+
+                }
+            });
+        }
+
         console.log(approvedBalance);
 
         if (address) {
 
             dispatch(approvalAmount(address));
             setInterval(() => {
+                fetchHPS();
                 dispatch(approvalAmount(address));
             }, 5000);
         }
-    }, [approvedBalance, dispatch, address, hpsBalance]);
+    }, [approvedBalance, dispatch, address, hpsBalance, web3, networkID]);
 
     function walletconnectOnclick() {
         if (connected) {
@@ -374,10 +393,14 @@ const SwapCard: React.FC = () => {
             connectToWallet()
         }
     }
+    const isSwaping = false;
     function swapButtontext() {
         if (connected) {
             if (isApproving) {
                 return 'Approving';
+            }
+            if (isSwaping) {
+                return 'Swaping';
             }
             return 'Swap';
         } else {
@@ -392,6 +415,9 @@ const SwapCard: React.FC = () => {
                 return <SwapButton onClick={walletconnectOnclick} >{swapButtontext()}</SwapButton>
             } else {
                 if (isApproved) {
+                    if (isSwaping) {
+                        return <SwapButton>Swaping</SwapButton>
+                    }
                     return <SwapButton onClick={walletconnectOnclick}>{swapButtontext()}</SwapButton>
                 } else {
                     if (isApproving) {
