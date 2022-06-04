@@ -9,6 +9,8 @@ import { connectWallet } from './components/walletconnect/connection';
 
 const App: React.FC = () => {
 
+
+
   const dispatch = useDispatch();
 
   useEffect(() => {

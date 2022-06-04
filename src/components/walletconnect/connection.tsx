@@ -7,9 +7,26 @@ import { Dispatch } from 'redux';
 import * as types from '../../constants/actionConstants';
 import { WalletActions, ApprovalActions } from '../../redux/reducer'
 import WalletConnectProvider from '@walletconnect/web3-provider';
+import random from 'lodash/random'
 
 const RPC_URL_BSC = 'https://bsc-dataseed.binance.org/'
 // const RPC_URL_ROPSTON = 'https://ropsten.infura.io/v3/09bcc0646ff04b2f844b23be91e375f7'
+
+const REACT_APP_NODE_1 = "https://bsc-dataseed1.ninicoin.io"
+
+
+const REACT_APP_NODE_2 = "https://bsc-dataseed1.defibit.io"
+
+
+const REACT_APP_NODE_3 = "https://bsc-dataseed.binance.org"
+// const RPC_URL_ROPSTON = 'https://ropsten.infura.io/v3/09bcc0646ff04b2f844b23be91e375f7'
+
+const nodes = [REACT_APP_NODE_1, REACT_APP_NODE_2, REACT_APP_NODE_3]
+
+const getNodeUrl = () => {
+    const randomIndex = random(0, nodes.length - 1)
+    return nodes[randomIndex]
+}
 
 export default function create() {
     return true;
@@ -18,7 +35,7 @@ export default function create() {
 
 const contractAddress = "0x4Fd32530c0b627a42FCc4f1fA90ec3F270661BC9";
 const hpsContract = "0xeDa21B525Ac789EaB1a08ef2404dd8505FfB973D";
-const provider_main = new ethers.providers.JsonRpcProvider(RPC_URL_BSC);
+const provider_main = new ethers.providers.JsonRpcProvider(getNodeUrl());
 
 export const mint = async (web3: any) => {
 
@@ -245,7 +262,7 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions | App
         };
         subscribeProvider(web3Provider);
     } catch (err) {
-        notifyerror("user rejected");
+        notifyerror("Not Connected");
     }
 
 }

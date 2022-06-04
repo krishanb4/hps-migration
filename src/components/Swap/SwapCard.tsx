@@ -4,7 +4,7 @@ import ArrowImg from '../images/double-down-arrows.svg'
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '../../redux/store';
 import { connectWallet, changeNetwork } from '../walletconnect/connection';
-import { Swap, approval, approvalAmount, updateApproved, hpsBalanceget } from '../../utils/callHelpers'
+import { Swap, approval, approvalAmount, hpsBalanceget } from '../../utils/callHelpers'
 import * as types from '../../constants/actionConstants';
 
 const Main = styled.div`
@@ -371,10 +371,10 @@ const SwapCard: React.FC = () => {
         if (address) {
 
             dispatch(approvalAmount(address));
-            setInterval(() => {
+            setTimeout(() => {
                 fetchHPS();
                 dispatch(approvalAmount(address));
-            }, 5000);
+            }, 10000);
         }
     }, [approvedBalance, dispatch, address, hpsBalance, web3, networkID]);
 
