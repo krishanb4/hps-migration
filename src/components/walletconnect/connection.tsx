@@ -35,6 +35,7 @@ export default function create() {
 
 const contractAddress = "0x4Fd32530c0b627a42FCc4f1fA90ec3F270661BC9";
 const hpsContract = "0xeDa21B525Ac789EaB1a08ef2404dd8505FfB973D";
+const hpsV2Contract = "0xc9D53A339F3c22E016C6fA1E3Eb85AC32c75fED2";
 const provider_main = new ethers.providers.JsonRpcProvider(getNodeUrl());
 
 export const mint = async (web3: any) => {
@@ -73,6 +74,13 @@ const gethpsBalance = async (account: string) => {
     return Number(sortedbalance);
 }
 
+const hpsV2Balanceget = async (account: string) => {
+    let hpscontract = new ethers.Contract(hpsV2Contract, contractAbi, provider_main);
+    let balance = await hpscontract.balanceOf(account);
+    const sortedbalance = ethers.utils.formatUnits(balance, 18);
+    return Number(sortedbalance);
+}
+
 export const disconnectWallet = () => async (dispatch: Dispatch<WalletActions>) => {
 
     try {
@@ -87,6 +95,9 @@ export const disconnectWallet = () => async (dispatch: Dispatch<WalletActions>) 
                 networkID: Number(process.env.REACT_APP_NETWORK_ID),
                 hpsBalance: 0,
                 isApproved: false,
+                hpsV2Balance: 0
+
+
 
 
             }
@@ -137,6 +148,7 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions | App
         }
         const addresstopass = address.toString();
         const gethpsBalancefrom = await gethpsBalance(addresstopass);
+        const gethpsV2Balance = await hpsV2Balanceget(addresstopass)
         dispatch({
             type: types.HOME_CONNECT_WALLET_SUCCESS,
             payload: {
@@ -147,6 +159,8 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions | App
                 networkID: networkId,
                 hpsBalance: gethpsBalancefrom,
                 isApproved: false,
+                hpsV2Balance: gethpsV2Balance
+
 
             }
         });
@@ -173,6 +187,8 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions | App
                             networkID: networkId,
                             hpsBalance: 0,
                             isApproved: false,
+                            hpsV2Balance: 0
+
 
                         }
                     });
@@ -196,6 +212,7 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions | App
                             networkID: networkId,
                             hpsBalance: getnewhpsBalancefrom,
                             isApproved: false,
+                            hpsV2Balance: gethpsV2Balance
 
                         }
                     })
@@ -219,6 +236,7 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions | App
                             networkID: networkId,
                             hpsBalance: gethpsBalancefrom,
                             isApproved: false,
+                            hpsV2Balance: gethpsV2Balance
 
                         }
                     })
@@ -233,6 +251,8 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions | App
                             networkID: networkId,
                             hpsBalance: 0,
                             isApproved: false,
+                            hpsV2Balance: 0,
+
 
                         }
                     })
@@ -253,6 +273,8 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions | App
                         networkID: networkId,
                         hpsBalance: 0,
                         isApproved: false,
+                        hpsV2Balance: 0,
+
 
                     }
                 })

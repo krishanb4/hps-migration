@@ -19,6 +19,7 @@ export interface DefaultStateI {
     address: string,
     networkID: number,
     hpsBalance: number,
+    hpsV2Balance: number,
 
 }
 
@@ -29,6 +30,7 @@ const defaultState: DefaultStateI = {
     address: '',
     networkID: 0,
     hpsBalance: 0,
+    hpsV2Balance: 0,
 
 };
 
@@ -131,6 +133,7 @@ export const reducer = (state: DefaultStateI = defaultState, action: WalletActio
                 address: action.payload.address,
                 networkID: action.payload.networkID,
                 hpsBalance: action.payload.hpsBalance,
+                hpsV2Balance: action.payload.hpsV2Balance,
 
             }
 
@@ -143,6 +146,8 @@ export const reducer = (state: DefaultStateI = defaultState, action: WalletActio
                 address: action.payload.address,
                 networkID: action.payload.networkID,
                 hpsBalance: action.payload.hpsBalance,
+                hpsV2Balance: action.payload.hpsV2Balance,
+
 
             }
         case types.HOME_NETWORK_CHANGED:
@@ -154,6 +159,8 @@ export const reducer = (state: DefaultStateI = defaultState, action: WalletActio
                 address: action.payload.address,
                 networkID: action.payload.networkID,
                 hpsBalance: action.payload.hpsBalance,
+                hpsV2Balance: action.payload.hpsV2Balance,
+
 
             }
         case types.HOME_ACCOUNTS_CHANGED:
@@ -165,6 +172,7 @@ export const reducer = (state: DefaultStateI = defaultState, action: WalletActio
                 address: action.payload.address,
                 networkID: action.payload.networkID,
                 hpsBalance: action.payload.hpsBalance,
+                hpsV2Balance: action.payload.hpsV2Balance,
 
             }
         default:

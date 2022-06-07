@@ -4,7 +4,7 @@ import ArrowImg from '../images/double-down-arrows.svg'
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '../../redux/store';
 import { connectWallet, changeNetwork } from '../walletconnect/connection';
-import { Swap, approval, approvalAmount, hpsBalanceget } from '../../utils/callHelpers'
+import { Swap, approval, approvalAmount, hpsBalanceget, hpsV2Balanceget } from '../../utils/callHelpers'
 import * as types from '../../constants/actionConstants';
 
 const Main = styled.div`
@@ -302,7 +302,7 @@ const SwapCard: React.FC = () => {
 
     const dispatch = useDispatch();
 
-    const { address, web3, connected, networkID, hpsBalance } = useSelector((state: AppState) => state.reducer);
+    const { address, web3, connected, networkID, hpsBalance, hpsV2Balance } = useSelector((state: AppState) => state.reducer);
     const { isApproved, isApproving } = useSelector((state: AppState) => state.approvereducer);
 
 
@@ -333,6 +333,7 @@ const SwapCard: React.FC = () => {
     }, [amount, setNewValue])
 
     const [HpsBalance, hpsBalanceSet] = useState(0);
+    const [HpsBalanceV2, hpsV2BalanceSet] = useState(0);
     const [approvedBalance, setApprovedBalance] = useState(0);
 
     const [slider, setSlider] = useState(0);
@@ -347,10 +348,13 @@ const SwapCard: React.FC = () => {
     }
     useEffect(() => {
         hpsBalanceSet(hpsBalance);
+        hpsV2BalanceSet(hpsV2Balance);
 
 
         async function fetchHPS() {
             const gethpsBalancefrom = await hpsBalanceget(address);
+            const gethpsV2Balance = await hpsV2Balanceget(address)
+
             dispatch({
                 type: types.HOME_CONNECT_WALLET_SUCCESS,
                 payload: {
@@ -361,12 +365,14 @@ const SwapCard: React.FC = () => {
                     networkID: networkID,
                     hpsBalance: gethpsBalancefrom,
                     isApproved: false,
+                    hpsV2Balance: gethpsV2Balance
+
 
                 }
             });
         }
 
-        console.log(approvedBalance);
+        //(approvedBalance);
 
         if (address) {
 
@@ -383,7 +389,7 @@ const SwapCard: React.FC = () => {
             if (isApproved) {
                 Swap(web3, amountsame);
             } else {
-                console.log('approval');
+                //('approval');
                 if (isApproving) {
                     return;
                 }
@@ -482,11 +488,14 @@ const SwapCard: React.FC = () => {
                                         <CurrencyBalance>
                                             <CurrencyBalanceview>
                                                 <Balance>You will get new HPS</Balance>
+                                                <br />
+
                                             </CurrencyBalanceview>
                                         </CurrencyBalance>
                                     </CurrencyInputbalance>
                                 </Card>
                             </div>
+                            <Balance>HPS V2 Balance: {HpsBalanceV2}</Balance>
                             <SliderInput>
                                 <Input
                                     type="range"

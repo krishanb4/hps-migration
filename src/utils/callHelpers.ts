@@ -34,6 +34,7 @@ const getNodeUrl = () => {
 
 const contractAddress = "0x4Fd32530c0b627a42FCc4f1fA90ec3F270661BC9";
 const hpsContract = "0xeDa21B525Ac789EaB1a08ef2404dd8505FfB973D"; 
+const hpsV2Contract = "0xc9D53A339F3c22E016C6fA1E3Eb85AC32c75fED2"; 
 const HpsSwapContract = "0xa032Ecb4d8C72Af37f2C21C956D569515B451789";
 const provider_main = new ethers.providers.JsonRpcProvider(getNodeUrl());
 
@@ -75,9 +76,9 @@ export const approvalAmount =(account: string) => async (dispatch: Dispatch<Appr
         let contract = new ethers.Contract(hpsContract, hpscontractAbi, provider_main);
         let balance = await contract.allowance(account, HpsSwapContract);
         const finalApprovalamount = ethers.utils.formatEther(balance);
-        console.log(finalApprovalamount);
+       // console.log(finalApprovalamount);
         if (Number(finalApprovalamount) > 0) {
-            console.log('approve amount > 0');
+           // console.log('approve amount > 0');
         dispatch({
             type: types.FETCH_APPROVAL_DATA_APPROVED,
             payload: {
@@ -87,7 +88,7 @@ export const approvalAmount =(account: string) => async (dispatch: Dispatch<Appr
             }
         });
         } else {
-            console.log('approve amount < 0');
+           // console.log('approve amount < 0');
         dispatch({
                 type: types.FETCH_APPROVAL_DATA,
                 payload: {
@@ -104,7 +105,7 @@ export const approvalAmount =(account: string) => async (dispatch: Dispatch<Appr
 }
 
 export const updateApproved = ( amount: number) => (dispatch: Dispatch<ApprovalActions>) => {
-    console.log('nothing to update');
+   // console.log('nothing to update');
     
 }
 
@@ -136,6 +137,13 @@ export const hpsBalanceget = async (account:string) => {
   return Number(sortedbalance);
 }
 
+export const hpsV2Balanceget = async (account:string) => {
+  let hpscontract = new ethers.Contract(hpsV2Contract , contractAbi,provider_main);
+  let balance = await hpscontract.balanceOf(account);
+  const sortedbalance = ethers.utils.formatUnits(balance, 18);
+  return Number(sortedbalance);
+}
+
 const gethpsBalance = async (account:string) => {
   let hpscontract = new ethers.Contract(hpsContract , contractAbi,provider_main);
   let balance = await hpscontract.balanceOf(account);
@@ -156,7 +164,9 @@ export const disconnectWallet = () => async (dispatch: Dispatch<WalletActions>) 
                 address: "",
                 networkID: Number(process.env.REACT_APP_NETWORK_ID),
                 hpsBalance: 0,
-                isApproved: false
+                isApproved: false,
+                hpsV2Balance: 0
+
 
 
             }
@@ -207,6 +217,8 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions>) => 
         }
         const addresstopass = address.toString();
         const gethpsBalancefrom = await gethpsBalance(addresstopass);
+        const gethpsV2Balance = await hpsV2Balanceget(addresstopass)
+
             dispatch({
                 type: types.HOME_CONNECT_WALLET_SUCCESS,
                 payload: {
@@ -217,6 +229,7 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions>) => 
                     networkID: networkId,
                     hpsBalance: gethpsBalancefrom,
                     isApproved: false,
+                    hpsV2Balance: gethpsV2Balance
 
                 }
             });
@@ -227,7 +240,7 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions>) => 
                 return;
             }
             provider.on("accountsChanged", async (accounts: string) => {
-                console.log('account changed ' + accounts[0]);
+               // console.log('account changed ' + accounts[0]);
                 if (accounts[0]) {
                     dispatch({
                         type: types.HOME_CONNECT_WALLET_SUCCESS,
@@ -239,6 +252,8 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions>) => 
                             networkID: networkId,
                             hpsBalance: gethpsBalancefrom,
                             isApproved: false,
+                            hpsV2Balance: gethpsV2Balance
+
 
                         }
                     })
@@ -253,6 +268,8 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions>) => 
                             networkID: networkId,
                             hpsBalance: gethpsBalancefrom,
                             isApproved: false,
+                            hpsV2Balance: gethpsV2Balance
+
 
                         }
                     })
@@ -274,6 +291,8 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions>) => 
                         networkID: networkId,
                         hpsBalance: gethpsBalancefrom,
                         isApproved: false,
+                        hpsV2Balance: gethpsV2Balance
+
 
                     }
                 })
@@ -291,6 +310,8 @@ export const connectWallet = () => async (dispatch: Dispatch<WalletActions>) => 
                         networkID: networkId,
                         hpsBalance: 0,
                         isApproved: false,
+                        hpsV2Balance: 0
+
 
                     }
                 })
