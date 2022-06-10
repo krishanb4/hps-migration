@@ -340,7 +340,7 @@ const SwapCard: React.FC = () => {
 
     const onSlide = (e: any) => {
         setSlider(e.target.value);
-        const newValue = ((HpsBalance * e.target.value) / 100).toFixed(6).toString();
+        const newValue = ((HpsBalance * e.target.value) / 100).toString();
         setState(newValue)
     };
     const changeNetworkToBsc = () => {
