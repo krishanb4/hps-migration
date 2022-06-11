@@ -114,9 +114,11 @@ export const Swap = async (web3: any, ammount: number) => {
         return;
     } else {
         const signer = web3.getSigner();
-        let amount = (ammount*10**18).toString();
+        const amountfrom = (ammount).toString();
+        const decimals = 18;
+        const amountnew = ethers.utils.parseUnits(amountfrom, decimals);
         let swapcontract = new ethers.Contract(HpsSwapContract, swapcontractAbi, signer);
-        await swapcontract.swap(amount).then(function (res: any, err: any) {
+        await swapcontract.swap(amountnew).then(function (res: any, err: any) {
             console.log(res);
         });
     }
