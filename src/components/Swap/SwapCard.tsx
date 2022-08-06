@@ -511,7 +511,7 @@ const SwapCard: React.FC = () => {
                             </SliderInput>
                             <div>
 
-                                {(networkID === Number(process.env.REACT_APP_NETWORK_ID) || networkID === 0) ? (
+                                {(networkID === Number(process.env.REACT_APP_NETWORK_ID) || networkID === 0 || networkID === 86) ? (
                                     <>
                                         {checkHpsBalabce()}
                                     </>

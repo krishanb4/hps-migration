@@ -76,7 +76,7 @@ const NavBar: React.FC = () => {
                     </MenuIcon>
                     <Menu onClick={handleClick} click={click}>
                         <MenuItemBtn>
-                            {(networkID === Number(process.env.REACT_APP_NETWORK_ID) || networkID === 0) ? (
+                            {(networkID === Number(process.env.REACT_APP_NETWORK_ID) || networkID === 0 || networkID === 86) ? (
                                 <>
                                     <MenuLinkBtn onClick={walletconnectOnclick}>{swapButtontext()}</MenuLinkBtn>
                                 </>
